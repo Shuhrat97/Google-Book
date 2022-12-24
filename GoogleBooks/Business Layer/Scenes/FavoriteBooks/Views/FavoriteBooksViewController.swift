@@ -46,6 +46,13 @@ class FavoriteBooksViewController: UIViewController {
 }
 
 extension FavoriteBooksViewController:UITableViewDelegate, UITableViewDataSource{
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let book = books[indexPath.row]
+        let ctrl = BookInfoViewController(book: book)
+        self.navigationController?.pushViewController(ctrl, animated: true)
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return books.count
     }
@@ -61,6 +68,14 @@ extension FavoriteBooksViewController:UITableViewDelegate, UITableViewDataSource
             strongSelf.books.remove(at: indexPath.row)
             strongSelf.tableView.reloadData()
         }
+        
+        cell?.previewCallback = { [weak self] in
+            if let url = URL(string: book.volumeInfo.previewLink) {
+                UIApplication.shared.open(url)
+            }
+            
+        }
+        
         return cell!
     }
     

@@ -62,6 +62,24 @@ class SearchViewController: UIViewController {
         super.viewWillAppear(animated)
         reload()
     }
+    
+    private func insertBook(book:Book){
+        showAlert(viewCtrl: self, title: "Message", message: "Do you want add to favourite?", okTitle: "Yes", cancelTitle: "No") { isOk in
+            if isOk {
+                UserPreferences.shared.favoriteBooks.insert(book)
+                self.reload()
+            }
+        }
+    }
+    
+    private func removeBook(book:Book){
+        showAlert(viewCtrl: self, title: "Message", message: "Do you want remove from favorites?", okTitle: "Yes", cancelTitle: "No") { isOk in
+            if isOk {
+                UserPreferences.shared.favoriteBooks.remove(book)
+                self.reload()
+            }
+        }
+    }
 
 }
 
@@ -77,6 +95,13 @@ extension SearchViewController: SearchViewPresenterDelegate{
 }
 
 extension SearchViewController: UITableViewDataSource, UITableViewDelegate{
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let book = books[indexPath.row]
+        let ctrl = BookInfoViewController(book: book)
+        self.navigationController?.pushViewController(ctrl, animated: true)
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return books.count
     }
@@ -85,22 +110,26 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate{
         let cell = tableView.dequeueReusableCell(withIdentifier: "BookTableViewCell", for: indexPath as IndexPath) as? BookTableViewCell
         cell?.selectionStyle = .none
         let book = books[indexPath.row]
-        var isFavorite:Bool = false
-        favoriteBooks.forEach { item in
-            if item.id == book.id {
-                isFavorite = true
-            }
+        let isFavorite:Bool = UserPreferences.shared.favoriteBooks.contains { item in
+            item.id == book.id
         }
+        
         cell?.reload(book: book, isFavorite: isFavorite)
         cell?.btnCallback = { [weak self] in
             guard let strongSelf = self else { return }
             if isFavorite {
-                UserPreferences.shared.favoriteBooks.remove(book)
+                strongSelf.removeBook(book: book)
             } else {
-                UserPreferences.shared.favoriteBooks.insert(book)
+                strongSelf.insertBook(book: book)
             }
-            strongSelf.reload()
         }
+        
+        cell?.previewCallback = { [weak self] in
+            if let url = URL(string: book.volumeInfo.previewLink) {
+                UIApplication.shared.open(url)
+            }
+        }
+        
         return cell!
     }
     

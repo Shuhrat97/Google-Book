@@ -39,7 +39,15 @@ class BookTableViewCell: UITableViewCell {
         return btn
     }()
     
+    private let openBtn:UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setTitle("Нажмите для просмотра...", for: .normal)
+        btn.contentHorizontalAlignment = .left
+        return btn
+    }()
+    
     var btnCallback:()->() = {}
+    var previewCallback:()->() = {}
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -48,6 +56,8 @@ class BookTableViewCell: UITableViewCell {
         makeConstraints()
         
         favoriteBtn.addTarget(self, action: #selector(btnTapped), for: .touchUpInside)
+        
+        openBtn.addTarget(self, action: #selector(previewTapped), for: .touchUpInside)
     }
     
     required init?(coder: NSCoder) {
@@ -59,6 +69,7 @@ class BookTableViewCell: UITableViewCell {
         contentView.addSubview(titleLbl)
         contentView.addSubview(authorLbl)
         contentView.addSubview(favoriteBtn)
+        contentView.addSubview(openBtn)
     }
     
     private func makeConstraints(){
@@ -81,16 +92,28 @@ class BookTableViewCell: UITableViewCell {
             make.right.equalTo(favoriteBtn.snp.left).offset(-20)
         }
         
+        openBtn.snp.makeConstraints { make in
+            make.top.equalTo(authorLbl.snp.bottom).offset(10)
+            make.left.equalTo(imgView.snp.right).offset(20)
+            make.right.equalTo(favoriteBtn.snp.left).offset(-20)
+        }
+        
         favoriteBtn.snp.makeConstraints { make in
             make.top.equalTo(20)
             make.right.equalTo(-20)
             make.width.height.equalTo(30)
         }
         
+        
+        
     }
     
     @objc func btnTapped(){
         btnCallback()
+    }
+    
+    @objc func previewTapped(){
+        previewCallback()
     }
 
     
